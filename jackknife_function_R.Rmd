@@ -267,9 +267,14 @@ The code for `jackknife()` is still a bit clunky:
 
 - write a function that calculates the `n` needed for the above code:
 
+- Make the function select the correct dimensions
+    - length for a 1d object
+    - number of rows for 2d
+
     ```{r, eval=FALSE}
       data_size <- function(the_data) {
-  
+        ifelse(dim(the_data)==NULL,size<-length(the_data),size<-nrow(the_data))
+        return(size)
       }
     ```
 - Write a function that calculate the variance of all the estimates and returns the standard error
