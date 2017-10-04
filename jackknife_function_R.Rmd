@@ -127,7 +127,7 @@ jackknife.lm <- function(df,formula,p) {
       coeffs[i,j] = model$coefficients[j]
     }
   }
-  jackknife.vars = (n-1)^2/n*apply(coeffs, 2, sd)
+  jackknife.vars = (n-1)^2/n*apply(coeffs, 2, var)
   jackknife.stderrs <- sqrt(jackknife.vars)
   
   return(jackknife.stderrs)
@@ -255,7 +255,7 @@ all.equal(jackknife(estimator=gamma.est,the_data=data$input),
 ```
 
 
-```{r, eval=F}
+```{r, eval=T}
 est.coefs <- function(the_data) {
   return(lm(output~input,data=the_data)$coefficients)
 }
@@ -266,7 +266,7 @@ all.equal(est.coefs(data), coefficients(my.lm))
 ---
 
 
-```{r, eval=F}
+```{r, eval=T}
 jackknife(estimator=est.coefs,the_data=data)
 all.equal(jackknife(estimator=est.coefs,the_data=data),
           jackknife.lm(df=data,formula="output~input",p=2))
