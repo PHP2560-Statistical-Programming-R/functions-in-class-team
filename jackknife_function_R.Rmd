@@ -319,5 +319,11 @@ jackknife <- function(estimator,the_data) {
 
 all.equal(jackknife(estimator=gamma.est,the_data=data$input),
           gamma.jackknife(data$input), check.names=FALSE)
+
+#Test:
+jackknife(estimator=est.coefs,the_data=data)
+all.equal(jackknife(estimator=est.coefs,the_data=data),
+          jackknife.lm(df=data,formula="output~input",p=2))
+
 ```
 
