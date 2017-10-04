@@ -26,14 +26,20 @@ The goal of this project is to work through building functions around the Jackki
 **PHP 2560 Only** (Why $(n-1)^2 / n$?  Think about just getting the standard
     error of the mean)
 
+The ratio of (n-1) to n is to correct for using samples of (n-1) instead of n, and the second factor of (n-1) is to account for the fact that we calculated a standard deviation of (n-1) samples instead of a sample of 1.
 
 
 Write a function called `mean.jackknife` that takes argument `a_vector` and returns a jackknife estimate of the standard error.
 
 
-```{r, eval=FALSE}
+```{r, eval=T}
 mean.jackknife <- function(a_vector) {
-  # Put your function in here
+  n = length(a_vector)
+  theta = vector("numeric", length=n)
+  for(i in 1:n){
+    theta[i] = mean(a_vector[-i])
+  }
+  jackknife.stderr = sqrt(var(theta)*(n-1)^2/n)
   return(jackknife.stderr)
 }
 ```
@@ -43,7 +49,7 @@ mean.jackknife <- function(a_vector) {
 #### Jackknife for the mean Example: test your code here
 
 
-```{r, eval = FALSE}
+```{r, eval = T}
 some_normals <- rnorm(100,mean=7,sd=5)
 mean(some_normals)
 (formula_se_of_mean <- sd(some_normals)/sqrt(length(some_normals)))
