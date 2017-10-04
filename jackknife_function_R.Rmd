@@ -115,10 +115,22 @@ gamma.jackknife(input)
 
 Write a function called `jackknife.lm` that takes arguments `df`, `formula` and `p` and returns jackknife standard error estimates on the coefficients of a linear regression model. 
 
-```{r, eval=FALSE}
+```{r, eval=T}
 jackknife.lm <- function(df,formula,p) {
   
-  return(jackknife.stderr)
+  n= dim(df)[1]
+  
+  coeffs = matrix(nrow=n, ncol=p)
+  for(i in 1:n) {
+    model = lm(formula,data=df[-i,])
+    for(j in 1:p){
+      coeffs[i,j] = model$coefficients[j]
+    }
+  }
+  jackknife.vars = (n-1)^2/n*apply(coeffs, 2, sd)
+jackknife.stderrs <- sqrt(jackknife.vars)
+  
+  return(jackknife.stderrs)
 }
 ```
 
@@ -134,7 +146,7 @@ my.lm <- lm(output~input, data=data)
 coefficients(my.lm)
 # "Official" standard errors
 sqrt(diag(vcov(my.lm)))
-#jackknife.lm(df=data,formula="output~input",p=2)
+jackknife.lm(df=data,formula="output~input",p=2)
 ```
 
 
@@ -293,7 +305,7 @@ scale_and_sqrt_vars <- function(jackknife.ests,n) {
 
 ###Now invoke those functions
 
-```{r, eval=FALSE}
+```{r, eval=T}
 jackknife <- function(estimator,the_data) {
   n <- data_size(the_data)
   omit_and_est <- function(omit) {
@@ -302,5 +314,10 @@ jackknife <- function(estimator,the_data) {
   jackknife.ests <- matrix(sapply(1:n, omit_and_est), ncol=n)
   return(scale_and_sqrt_vars(jackknife.ests,n))
 }
+
+#Test:
+
+all.equal(jackknife(estimator=gamma.est,the_data=data$input),
+          gamma.jackknife(data$input), check.names=FALSE)
 ```
 

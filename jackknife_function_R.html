@@ -153,9 +153,9 @@ want the standard error of our estimate, <span class="math inline">\(se_{\hat{\t
 <h4>Jackknife for the mean Example: test your code here</h4>
 <pre class="r"><code>some_normals &lt;- rnorm(100,mean=7,sd=5)
 mean(some_normals)</code></pre>
-<pre><code>## [1] 6.871709</code></pre>
+<pre><code>## [1] 8.097738</code></pre>
 <pre class="r"><code>(formula_se_of_mean &lt;- sd(some_normals)/sqrt(length(some_normals)))</code></pre>
-<pre><code>## [1] 0.5035789</code></pre>
+<pre><code>## [1] 0.4892478</code></pre>
 <pre class="r"><code>all.equal(formula_se_of_mean,mean.jackknife(some_normals))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 </div>
@@ -196,10 +196,10 @@ jackknife.stderrs &lt;- c(se.a.est = sqrt(a.var), se.s.est=sqrt(s.var))
 <pre class="r"><code>input &lt;- rgamma(1000, shape=0.1, scale=10)
 gamma.est(input)</code></pre>
 <pre><code>##         a         s 
-## 0.1021631 9.5633560</code></pre>
+## 0.1070081 9.6272332</code></pre>
 <pre class="r"><code>gamma.jackknife(input)</code></pre>
-<pre><code>##    se.a.est    se.s.est 
-## 0.009541249 1.043654203</code></pre>
+<pre><code>##   se.a.est   se.s.est 
+## 0.01021445 1.08777703</code></pre>
 </div>
 </div>
 <div id="jackknife-for-linear-regression-coefficients" class="section level2">
@@ -207,7 +207,19 @@ gamma.est(input)</code></pre>
 <p>Write a function called <code>jackknife.lm</code> that takes arguments <code>df</code>, <code>formula</code> and <code>p</code> and returns jackknife standard error estimates on the coefficients of a linear regression model.</p>
 <pre class="r"><code>jackknife.lm &lt;- function(df,formula,p) {
   
-  return(jackknife.stderr)
+  n= dim(df)[1]
+  
+  coeffs = matrix(nrow=n, ncol=p)
+  for(i in 1:n) {
+    model = lm(formula,data=df[-i,])
+    for(j in 1:p){
+      coeffs[i,j] = model$coefficients[j]
+    }
+  }
+  jackknife.vars = (n-1)^2/n*apply(coeffs, 2, sd)
+jackknife.stderrs &lt;- sqrt(jackknife.vars)
+  
+  return(jackknife.stderrs)
 }</code></pre>
 <div id="jackknife-for-linear-regression-coefficients-example" class="section level3">
 <h3>Jackknife for linear regression coefficients Example</h3>
@@ -216,12 +228,13 @@ data &lt;- data.frame(output,input)
 my.lm &lt;- lm(output~input, data=data)
 coefficients(my.lm)</code></pre>
 <pre><code>## (Intercept)       input 
-##    1.128402    0.580895</code></pre>
+##   1.1665069   0.5963065</code></pre>
 <pre class="r"><code># &quot;Official&quot; standard errors
 sqrt(diag(vcov(my.lm)))</code></pre>
 <pre><code>## (Intercept)       input 
-##  0.06789908  0.02116804</code></pre>
-<pre class="r"><code>#jackknife.lm(df=data,formula=&quot;output~input&quot;,p=2)</code></pre>
+##  0.07289558  0.02200961</code></pre>
+<pre class="r"><code>jackknife.lm(df=data,formula=&quot;output~input&quot;,p=2)</code></pre>
+<pre><code>## [1] 1.5187142 0.7778999</code></pre>
 </div>
 </div>
 <div id="refactoring-the-jackknife" class="section level2">
@@ -290,7 +303,7 @@ jackknife &lt;- function(estimator,the_data) {
 <div id="it-works" class="section level3">
 <h3>It works</h3>
 <pre class="r"><code>jackknife(estimator=mean,the_data=some_normals)</code></pre>
-<pre><code>## [1] 0.5035789</code></pre>
+<pre><code>## [1] 0.4892478</code></pre>
 <pre class="r"><code>all.equal(jackknife(estimator=mean,the_data=some_normals),
           mean.jackknife(some_normals))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
@@ -319,13 +332,11 @@ all.equal(jackknife(estimator=est.coefs,the_data=data),
 <ul>
 <li><p>write a function that calculates the <code>n</code> needed for the above code:</p>
 <pre class="r"><code>  data_size &lt;- function(the_data) {
-
+    n = ifelse(is.vector(the_data), length(the_data), dim(the_data)[1])
+    return(n)
   }</code></pre></li>
-<li><p>Write a function that calculate the variance of all the estimates and returns the standard error &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</p></li>
+<li><p>Write a function that calculate the variance of all the estimates and returns the standard error</p></li>
 </ul>
-<pre class="r"><code>scale_and_sqrt_vars &lt;- function(jackknife.ests,n) {
-  
-=======</code></pre>
 <pre class="r"><code>scale_and_sqrt_vars &lt;- function(jackknife.ests,n) {
   
   var.of.reestimates &lt;- apply(jackknife.ests,1,var)
@@ -343,7 +354,13 @@ all.equal(jackknife(estimator=est.coefs,the_data=data),
   }
   jackknife.ests &lt;- matrix(sapply(1:n, omit_and_est), ncol=n)
   return(scale_and_sqrt_vars(jackknife.ests,n))
-}</code></pre>
+}
+
+#Test:
+
+all.equal(jackknife(estimator=gamma.est,the_data=data$input),
+          gamma.jackknife(data$input), check.names=FALSE)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 </div>
 </div>
 </div>
