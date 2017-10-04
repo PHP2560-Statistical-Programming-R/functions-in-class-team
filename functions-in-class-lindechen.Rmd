@@ -1,11 +1,8 @@
 ---
-title: "Untitled"
-author: "Olivia Iles"
-date: "March 7, 2017"
+title: "functions-in-class-lindechen"
 output: html_document
+author: "Linde Chen"
 ---
-
-
 
 
 # Project Goals
@@ -25,8 +22,6 @@ The goal of this project is to work through building functions around the Jackki
 
 **PHP 2560 Only** (Why $(n-1)^2 / n$?  Think about just getting the standard
     error of the mean)
-
-
 
 Write a function called `mean.jackknife` that takes argument `a_vector` and returns a jackknife estimate of the standard error.
 
@@ -75,19 +70,6 @@ Write a function called `gamma.jackknife` that takes argument `a_vector` and ret
 ```{r, eval=FALSE }
 gamma.jackknife <- function(a_vector) {
   
-  n= length(a_vector)
-  
-  s_vec = vector(mode="numeric",length=n)
-  a_vec = vector(mode="numeric",length=n)
-  for(i in 1:n) {
-    s_vec[i] = gamma.est(a_vector[-i])[["s"]]
-    a_vec[i] = gamma.est(a_vector[-i])[["a"]]
-  }
-    s.var = var(s_vec)*(((n-1)^2)/n)
-    a.var = var(a_vec)*(((n-1)^2)/n)
-  
-jackknife.stderrs <- c(se.a.est = sqrt(a.var), se.s.est=sqrt(s.var))
-  
   return(jackknife.stderrs)
 }
 ```
@@ -97,7 +79,7 @@ jackknife.stderrs <- c(se.a.est = sqrt(a.var), se.s.est=sqrt(s.var))
 ###Jackknife for Gamma Parameters Example
 
 
-```{r}
+```{r, eval=FALSE}
 input <- rgamma(1000, shape=0.1, scale=10)
 gamma.est(input)
 gamma.jackknife(input)
