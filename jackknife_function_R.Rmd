@@ -128,7 +128,7 @@ jackknife.lm <- function(df,formula,p) {
     }
   }
   jackknife.vars = (n-1)^2/n*apply(coeffs, 2, sd)
-jackknife.stderrs <- sqrt(jackknife.vars)
+  jackknife.stderrs <- sqrt(jackknife.vars)
   
   return(jackknife.stderrs)
 }
