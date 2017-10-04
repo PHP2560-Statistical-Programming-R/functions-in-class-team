@@ -153,9 +153,9 @@ want the standard error of our estimate, <span class="math inline">\(se_{\hat{\t
 <h4>Jackknife for the mean Example: test your code here</h4>
 <pre class="r"><code>some_normals &lt;- rnorm(100,mean=7,sd=5)
 mean(some_normals)</code></pre>
-<pre><code>## [1] 8.380712</code></pre>
+<pre><code>## [1] 6.871709</code></pre>
 <pre class="r"><code>(formula_se_of_mean &lt;- sd(some_normals)/sqrt(length(some_normals)))</code></pre>
-<pre><code>## [1] 0.5669843</code></pre>
+<pre><code>## [1] 0.5035789</code></pre>
 <pre class="r"><code>all.equal(formula_se_of_mean,mean.jackknife(some_normals))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 </div>
@@ -195,11 +195,11 @@ jackknife.stderrs &lt;- c(se.a.est = sqrt(a.var), se.s.est=sqrt(s.var))
 <h3>Jackknife for Gamma Parameters Example</h3>
 <pre class="r"><code>input &lt;- rgamma(1000, shape=0.1, scale=10)
 gamma.est(input)</code></pre>
-<pre><code>##           a           s 
-##  0.09546697 10.27225076</code></pre>
+<pre><code>##         a         s 
+## 0.1021631 9.5633560</code></pre>
 <pre class="r"><code>gamma.jackknife(input)</code></pre>
-<pre><code>##   se.a.est   se.s.est 
-## 0.01073528 1.52368644</code></pre>
+<pre><code>##    se.a.est    se.s.est 
+## 0.009541249 1.043654203</code></pre>
 </div>
 </div>
 <div id="jackknife-for-linear-regression-coefficients" class="section level2">
@@ -216,11 +216,11 @@ data &lt;- data.frame(output,input)
 my.lm &lt;- lm(output~input, data=data)
 coefficients(my.lm)</code></pre>
 <pre><code>## (Intercept)       input 
-##   1.1837022   0.5927574</code></pre>
+##    1.128402    0.580895</code></pre>
 <pre class="r"><code># &quot;Official&quot; standard errors
 sqrt(diag(vcov(my.lm)))</code></pre>
 <pre><code>## (Intercept)       input 
-##  0.07087411  0.02134490</code></pre>
+##  0.06789908  0.02116804</code></pre>
 <pre class="r"><code>#jackknife.lm(df=data,formula=&quot;output~input&quot;,p=2)</code></pre>
 </div>
 </div>
@@ -290,7 +290,7 @@ jackknife &lt;- function(estimator,the_data) {
 <div id="it-works" class="section level3">
 <h3>It works</h3>
 <pre class="r"><code>jackknife(estimator=mean,the_data=some_normals)</code></pre>
-<pre><code>## [1] 0.5669843</code></pre>
+<pre><code>## [1] 0.5035789</code></pre>
 <pre class="r"><code>all.equal(jackknife(estimator=mean,the_data=some_normals),
           mean.jackknife(some_normals))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
@@ -321,9 +321,16 @@ all.equal(jackknife(estimator=est.coefs,the_data=data),
 <pre class="r"><code>  data_size &lt;- function(the_data) {
 
   }</code></pre></li>
-<li><p>Write a function that calculate the variance of all the estimates and returns the standard error</p></li>
+<li><p>Write a function that calculate the variance of all the estimates and returns the standard error &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</p></li>
 </ul>
 <pre class="r"><code>scale_and_sqrt_vars &lt;- function(jackknife.ests,n) {
+  
+=======</code></pre>
+<pre class="r"><code>scale_and_sqrt_vars &lt;- function(jackknife.ests,n) {
+  
+  var.of.reestimates &lt;- apply(jackknife.ests,1,var)
+  jackknife.var &lt;- ((n-1)^2/n)* var.of.reestimates
+  jackknife.stderr &lt;- sqrt(jackknife.var)
   
   return(jackknife.stderr)
 }</code></pre>

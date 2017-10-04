@@ -289,7 +289,6 @@ scale_and_sqrt_vars <- function(jackknife.ests,n) {
   jackknife.var <- ((n-1)^2/n)* var.of.reestimates
   jackknife.stderr <- sqrt(jackknife.var)
   
->>>>>>> a2deb7e0ed7af91b307e1bcbb40bf863c7d6cf22
   return(jackknife.stderr)
 }
 ```
