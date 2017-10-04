@@ -153,9 +153,9 @@ want the standard error of our estimate, <span class="math inline">\(se_{\hat{\t
 <h4>Jackknife for the mean Example: test your code here</h4>
 <pre class="r"><code>some_normals &lt;- rnorm(100,mean=7,sd=5)
 mean(some_normals)</code></pre>
-<pre><code>## [1] 6.907754</code></pre>
+<pre><code>## [1] 6.64394</code></pre>
 <pre class="r"><code>(formula_se_of_mean &lt;- sd(some_normals)/sqrt(length(some_normals)))</code></pre>
-<pre><code>## [1] 0.4590435</code></pre>
+<pre><code>## [1] 0.5375924</code></pre>
 <pre class="r"><code>all.equal(formula_se_of_mean,mean.jackknife(some_normals))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 </div>
@@ -175,14 +175,17 @@ mean(some_normals)</code></pre>
 <p>Write a function called <code>gamma.jackknife</code> that takes argument <code>a_vector</code> and returns jackknife standard error estimates on the gamma parameters.</p>
 <pre class="r"><code>gamma.jackknife &lt;- function(a_vector) {
   
-  return(jackknife.stderrs)
+  #return(jackknife.stderrs)
 }</code></pre>
 </div>
 <div id="jackknife-for-gamma-parameters-example" class="section level3">
 <h3>Jackknife for Gamma Parameters Example</h3>
 <pre class="r"><code>input &lt;- rgamma(1000, shape=0.1, scale=10)
-gamma.est(input)
-gamma.jackknife(input)</code></pre>
+gamma.est(input)</code></pre>
+<pre><code>##          a          s 
+## 0.09865284 8.68878933</code></pre>
+<pre class="r"><code>gamma.jackknife(input)</code></pre>
+<pre><code>## NULL</code></pre>
 </div>
 </div>
 <div id="jackknife-for-linear-regression-coefficients" class="section level2">
@@ -190,17 +193,22 @@ gamma.jackknife(input)</code></pre>
 <p>Write a function called <code>jackknife.lm</code> that takes arguments <code>df</code>, <code>formula</code> and <code>p</code> and returns jackknife standard error estimates on the coefficients of a linear regression model.</p>
 <pre class="r"><code>jackknife.lm &lt;- function(df,formula,p) {
   
-  return(jackknife.stderr)
+  #return(jackknife.stderr)
 }</code></pre>
 <div id="jackknife-for-linear-regression-coefficients-example" class="section level3">
 <h3>Jackknife for linear regression coefficients Example</h3>
 <pre class="r"><code>output &lt;- 1.2 + 0.6*input +  rnorm(1000, 0, 2.1)
 data &lt;- data.frame(output,input)
 my.lm &lt;- lm(output~input, data=data)
-coefficients(my.lm)
-# &quot;Official&quot; standard errors
-sqrt(diag(vcov(my.lm)))
-jackknife.lm(df=data,formula=&quot;output~input&quot;,p=2)</code></pre>
+coefficients(my.lm)</code></pre>
+<pre><code>## (Intercept)       input 
+##   1.1137963   0.5916742</code></pre>
+<pre class="r"><code># &quot;Official&quot; standard errors
+sqrt(diag(vcov(my.lm)))</code></pre>
+<pre><code>## (Intercept)       input 
+##  0.07020116  0.02455261</code></pre>
+<pre class="r"><code>jackknife.lm(df=data,formula=&quot;output~input&quot;,p=2)</code></pre>
+<pre><code>## NULL</code></pre>
 </div>
 </div>
 <div id="refactoring-the-jackknife" class="section level2">
@@ -239,46 +247,68 @@ take the square roots</code></pre>
 </ul></li>
 <li><p>Write a function <code>omit.case</code> that omits a point given the data and returns the data minus that point. Make sure it can handle higher dimensions.</p>
 <pre class="r"><code>      omit.case &lt;- function(the_data,omitted_point) {
-    # This should take the data and omit one point at a time and return the new data
+    if(is.vector(the_data)){
+      return(the_data[-omitted_point])
+    } else {
+      return(the_data[-omitted_point,])
+    } 
         }</code></pre></li>
 <li><p>Write a function <code>omit_and_est</code> that takes the data with an omitted point and returns whatever function your estimator does.</p>
-<pre class="r"><code>    omit_and_est &lt;- function(omit) {
-          # This function should take the output of omit.case and use it as input for the estimator
-    }</code></pre></li>
-</ul>
-<pre class="r"><code>jackknife &lt;- function(estimator,the_data) {
-  
-  # Define n to be lenth or number of rows here
-  
-  
-  
-  jackknife.ests &lt;- matrix(sapply(1:n, omit_and_est), ncol=n)
+<pre class="r"><code>    omit_and_est &lt;- function(omit, estimator, the_data) { 
+      omitted = omit.case(the_data, omit)
+      estimator(omitted)
+    }
+
+
+jackknife &lt;- function(estimator,the_data) {
+
+  n = ifelse(is.vector(the_data), length(the_data), dim(the_data)[1])
+
+
+
+  jackknife.ests &lt;- matrix(sapply(1:n, omit_and_est, estimator=estimator, the_data=the_data), ncol=n)
   var.of.reestimates &lt;- apply(jackknife.ests,1,var)
   jackknife.var &lt;- ((n-1)^2/n)* var.of.reestimates
   jackknife.stderr &lt;- sqrt(jackknife.var)
   return(jackknife.stderr)
-}</code></pre>
+}</code></pre></li>
+</ul>
 <hr />
 <div id="it-works" class="section level3">
 <h3>It works</h3>
-<pre class="r"><code>jackknife(estimator=mean,the_data=some_normals)
-all.equal(jackknife(estimator=mean,the_data=some_normals),
+<pre class="r"><code>jackknife(estimator=mean,the_data=some_normals)</code></pre>
+<pre><code>## [1] 0.5375924</code></pre>
+<pre class="r"><code>all.equal(jackknife(estimator=mean,the_data=some_normals),
           mean.jackknife(some_normals))</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 <hr />
 <pre class="r"><code>all.equal(jackknife(estimator=gamma.est,the_data=data$input),
           gamma.jackknife(data$input))</code></pre>
+<pre><code>## [1] &quot;Modes: numeric, NULL&quot;              
+## [2] &quot;Lengths: 2, 0&quot;                     
+## [3] &quot;target is numeric, current is NULL&quot;</code></pre>
 <hr />
 <pre class="r"><code>all.equal(jackknife(estimator=gamma.est,the_data=data$input),
           gamma.jackknife(data$input), check.names=FALSE)</code></pre>
+<pre><code>## [1] &quot;Modes: numeric, NULL&quot;              
+## [2] &quot;Lengths: 2, 0&quot;                     
+## [3] &quot;target is numeric, current is NULL&quot;</code></pre>
 <pre class="r"><code>est.coefs &lt;- function(the_data) {
   return(lm(output~input,data=the_data)$coefficients)
 }
-est.coefs(data)
-all.equal(est.coefs(data), coefficients(my.lm))</code></pre>
+est.coefs(data)</code></pre>
+<pre><code>## (Intercept)       input 
+##   1.1137963   0.5916742</code></pre>
+<pre class="r"><code>all.equal(est.coefs(data), coefficients(my.lm))</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 <hr />
-<pre class="r"><code>jackknife(estimator=est.coefs,the_data=data)
-all.equal(jackknife(estimator=est.coefs,the_data=data),
+<pre class="r"><code>jackknife(estimator=est.coefs,the_data=data)</code></pre>
+<pre><code>## [1] 0.06995979 0.02458228</code></pre>
+<pre class="r"><code>all.equal(jackknife(estimator=est.coefs,the_data=data),
           jackknife.lm(df=data,formula=&quot;output~input&quot;,p=2))</code></pre>
+<pre><code>## [1] &quot;Modes: numeric, NULL&quot;              
+## [2] &quot;Lengths: 2, 0&quot;                     
+## [3] &quot;target is numeric, current is NULL&quot;</code></pre>
 </div>
 </div>
 <div id="further-refactoring-of-jackknife" class="section level2">
