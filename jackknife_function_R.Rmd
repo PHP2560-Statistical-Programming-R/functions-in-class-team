@@ -81,6 +81,19 @@ Write a function called `gamma.jackknife` that takes argument `a_vector` and ret
 ```{r, eval=FALSE }
 gamma.jackknife <- function(a_vector) {
   
+  n= length(a_vector)
+  
+  s_vec = vector(mode="numeric",length=n)
+  a_vec = vector(mode="numeric",length=n)
+  for(i in 1:n) {
+    s_vec[i] = gamma.est(a_vector[-i])[["s"]]
+    a_vec[i] = gamma.est(a_vector[-i])[["a"]]
+  }
+    s.var = var(s_vec)*(((n-1)^2)/n)
+    a.var = var(a_vec)*(((n-1)^2)/n)
+  
+jackknife.stderrs <- c(se.a.est = sqrt(a.var), se.s.est=sqrt(s.var))
+  
   return(jackknife.stderrs)
 }
 ```
