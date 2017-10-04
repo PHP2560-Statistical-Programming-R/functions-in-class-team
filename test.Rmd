@@ -81,20 +81,7 @@ Write a function called `gamma.jackknife` that takes argument `a_vector` and ret
 ```{r, eval=T }
 gamma.jackknife <- function(a_vector) {
   
-  n= length(a_vector)
-  
-  s_vec = vector(mode="numeric",length=n)
-  a_vec = vector(mode="numeric",length=n)
-  for(i in 1:n) {
-    s_vec[i] = gamma.est(a_vector[-i])[["s"]]
-    a_vec[i] = gamma.est(a_vector[-i])[["a"]]
-  }
-    s.var = var(s_vec)*(((n-1)^2)/n)
-    a.var = var(a_vec)*(((n-1)^2)/n)
-  
-jackknife.stderrs <- c(se.a.est = sqrt(a.var), se.s.est=sqrt(s.var))
-  
-  return(jackknife.stderrs)
+  #return(jackknife.stderrs)
 }
 ```
 
@@ -115,23 +102,10 @@ gamma.jackknife(input)
 
 Write a function called `jackknife.lm` that takes arguments `df`, `formula` and `p` and returns jackknife standard error estimates on the coefficients of a linear regression model. 
 
-```{r, eval=FALSE}
+```{r, eval=T}
+jackknife.lm <- function(df,formula,p) {
   
-  jackknife.lm <- function(df,formula,p) {
-  
-  myTable = (data.frame(matrix(NA, nrow = nrow(df), ncol = p)))
-  
-  for (a in 1:p){
-    for (b in 1:nrow(df)){
-        new_lm = lm(formula, df[-b, a])
-        myTable[b, a] = new_lm[[1]]
-    }}
-
-  for (c in 1:p){
-    jacknife.stderr = sqrt(var(myTable[,c]) * (n-1)^2 / n)
-    return(jacknife.stderr)
-  }}
-
+  #return(jackknife.stderr)
 }
 ```
 
@@ -147,8 +121,9 @@ my.lm <- lm(output~input, data=data)
 coefficients(my.lm)
 # "Official" standard errors
 sqrt(diag(vcov(my.lm)))
-#jackknife.lm(df=data,formula="output~input",p=2)
+jackknife.lm(df=data,formula="output~input",p=2)
 ```
+
 
 
 
@@ -256,7 +231,7 @@ all.equal(jackknife(estimator=gamma.est,the_data=data$input),
 ```
 
 
-```{r, eval=F}
+```{r, eval=T}
 est.coefs <- function(the_data) {
   return(lm(output~input,data=the_data)$coefficients)
 }
@@ -267,7 +242,7 @@ all.equal(est.coefs(data), coefficients(my.lm))
 ---
 
 
-```{r, eval=F}
+```{r, eval=T}
 jackknife(estimator=est.coefs,the_data=data)
 all.equal(jackknife(estimator=est.coefs,the_data=data),
           jackknife.lm(df=data,formula="output~input",p=2))
@@ -283,20 +258,14 @@ The code for `jackknife()` is still a bit clunky:
 
 - write a function that calculates the `n` needed for the above code:
 
-    ```{r}
+    ```{r, eval=FALSE}
       data_size <- function(the_data) {
-        n = ifelse(is.vector(the_data), length(the_data), dim(the_data)[1])
-        return(n)
+  
       }
     ```
 - Write a function that calculate the variance of all the estimates and returns the standard error
-
-```{r}
+```{r, eval=FALSE}
 scale_and_sqrt_vars <- function(jackknife.ests,n) {
-  
-  var.of.reestimates <- apply(jackknife.ests,1,var)
-  jackknife.var <- ((n-1)^2/n)* var.of.reestimates
-  jackknife.stderr <- sqrt(jackknife.var)
   
   return(jackknife.stderr)
 }
