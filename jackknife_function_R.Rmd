@@ -273,13 +273,21 @@ The code for `jackknife()` is still a bit clunky:
 
     ```{r, eval=FALSE}
       data_size <- function(the_data) {
-        ifelse(dim(the_data)==NULL,size<-length(the_data),size<-nrow(the_data))
+        size = 0
+        ifelse(is.null(dim(the_data)),size<-length(the_data),size<-nrow(the_data))
         return(size)
       }
     ```
 - Write a function that calculate the variance of all the estimates and returns the standard error
+  jackknife.ests <- matrix(sapply(1:n, omit_and_est), ncol=n)
+  var.of.reestimates <- apply(jackknife.ests,1,var)
+  jackknife.var <- ((n-1)^2/n)* var.of.reestimates
+  jackknife.stderr <- sqrt(jackknife.var)
 ```{r, eval=FALSE}
 scale_and_sqrt_vars <- function(jackknife.ests,n) {
+  
+  
+  
   
   return(jackknife.stderr)
 }
